@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -77,6 +78,15 @@ public class ExceptionControllerAdvice {
      * @param request {@link HttpServletRequest} object referring to the current request.
      * @return A {@link ResponseEntity} containing the error information and a 500 Internal Server Error status
      */
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseBody
+    public ResponseEntity<ProblemDetail> handleConstraintViolationException(ConstraintViolationException e, HttpServletRequest request) {
+        logger.warn("Validation error at {} {}: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ProblemDetail detail = this.detailBuild(e, status, request.getRequestURL(), ERROR_INVALID_REQUEST);
+        return ResponseEntity.status(status).body(detail);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity<ProblemDetail> handleGeneralException(Exception e, HttpServletRequest request) {
