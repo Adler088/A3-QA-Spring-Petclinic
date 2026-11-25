@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** PQT-3: regra de seguranca para referencias de GitHub Actions. */
 class GitHubActionsQaTest {
     private static final Pattern USES = Pattern.compile(
             "(?m)^\\s*(?:-\\s*)?uses:\\s*([^\\s#]+)");
@@ -36,7 +35,7 @@ class GitHubActionsQaTest {
                 while (matcher.find()) {
                     String referencia = matcher.group(1);
                     if (referencia.startsWith("./") || referencia.startsWith("docker://")) {
-                        continue; // acoes locais e imagens Docker nao usam sintaxe owner/repo@sha
+                        continue;
                     }
                     int at = referencia.lastIndexOf('@');
                     String versao = at >= 0 ? referencia.substring(at + 1) : "";

@@ -12,7 +12,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Regras de dominio: relacionamentos, consultas e validacao de visitas. */
 class ModelRelationsQaTest {
     private static ValidatorFactory factory;
     private static Validator validator;

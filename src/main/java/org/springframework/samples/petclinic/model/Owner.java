@@ -45,11 +45,8 @@ public class Owner extends Person {
 
     @Column(name = "telephone")
     @NotEmpty
-@Pattern(
-    regexp = "^[0-9]{10,11}$",
-    message = "Phone number must contain 10 or 11 digits"
-)
-private String telephone;
+    @Pattern(regexp = "^[0-9]{10,11}$", message = "Phone number must contain 10 or 11 digits")
+    private String telephone;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.EAGER)
     private Set<Pet> pets;

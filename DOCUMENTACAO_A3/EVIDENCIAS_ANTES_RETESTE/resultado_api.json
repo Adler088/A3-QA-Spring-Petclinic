@@ -1,0 +1,58 @@
+[
+  {
+    "id": "API-01",
+    "teste": "Listagem de proprietarios responde sem erro 5xx",
+    "status": "APROVADO",
+    "detalhes": "HTTP 200",
+    "duracao_s": 0.012
+  },
+  {
+    "id": "API-02",
+    "teste": "Listagem de pets responde sem erro 5xx",
+    "status": "APROVADO",
+    "detalhes": "HTTP 200",
+    "duracao_s": 0.02
+  },
+  {
+    "id": "API-03",
+    "teste": "Listagem de veterinarios responde sem erro 5xx",
+    "status": "APROVADO",
+    "detalhes": "HTTP 200",
+    "duracao_s": 0.019
+  },
+  {
+    "id": "API-04",
+    "teste": "ID de proprietario inexistente retorna 404",
+    "status": "APROVADO",
+    "detalhes": "HTTP 404",
+    "duracao_s": 0.029
+  },
+  {
+    "id": "API-05",
+    "teste": "Cadastrar proprietario com 11 digitos (HTTP 201)",
+    "status": "FALHOU",
+    "detalhes": "AssertionError: Esperado HTTP 201, recebido 400; resposta={\"detail\":\"The request contains invalid or missing parameters\",\"instance\":\"/petclinic/api/owners\",\"status\":400,\"title\":\"MethodArgumentNotValidException\",\"type\":\"http://localhost:9966/petclinic/api/owners\",\"timestamp\":\"20",
+    "duracao_s": 0.11
+  },
+  {
+    "id": "API-06",
+    "teste": "Consultar proprietario recem-criado",
+    "status": "BLOQUEADO",
+    "detalhes": "Dependencia: API-05 nao criou proprietario",
+    "duracao_s": 0
+  },
+  {
+    "id": "API-07",
+    "teste": "Telefone invalido nao deve causar erro 500",
+    "status": "APROVADO",
+    "detalhes": "HTTP 400 (esperado 4xx)",
+    "duracao_s": 0.005
+  },
+  {
+    "id": "API-08",
+    "teste": "Excluir proprietario criado pelo teste",
+    "status": "BLOQUEADO",
+    "detalhes": "Dependencia: API-05 nao criou proprietario",
+    "duracao_s": 0
+  }
+]

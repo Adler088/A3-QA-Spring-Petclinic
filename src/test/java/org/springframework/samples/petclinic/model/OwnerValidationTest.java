@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** PQT-1: Regressao da validacao do telefone do proprietario. */
 class OwnerValidationTest {
     private static ValidatorFactory factory;
     private static Validator validator;
