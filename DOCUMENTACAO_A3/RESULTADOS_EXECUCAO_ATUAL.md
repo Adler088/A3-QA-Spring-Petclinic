@@ -1,31 +1,26 @@
-# Resultado atual de execução — A3 Spring Petclinic
+﻿# Resultados dos testes automatizados - A3 QA
 
-## JUnit
+Data: 25/11/2026
 
-- Casos: 31
-- Aprovados: 30
+## Testes JUnit
+- Total registrado: 270
+- Aprovados: 269
 - Falhas: 0
 - Erros: 0
 - Ignorados: 1
 
-## Testes HTTP
+## Testes de API HTTP
+- Total: 10
+- Aprovados: 10
+- Falhas: 0
+- Bloqueados: 0
 
-Nenhum resultado atual encontrado. O backend precisa estar acessível em localhost:9966.
+## Correcoes realizadas
+- API-07: telefone invalido passou a retornar HTTP 400.
+- API-10: telefone com 12 digitos passou a retornar HTTP 400.
 
-## JaCoCo
+## Validacao
+- Maven: BUILD SUCCESS
+- JaCoCo: criterios de cobertura configurados atendidos
 
-# Cobertura JaCoCo — Spring Petclinic
-
-> Percentuais calculados a partir de `target/site/jacoco/jacoco.xml` deste computador.
-
-| Metrica | Cobertos | Nao cobertos | Cobertura |
-|---|---:|---:|---:|
-| Linhas | 106 | 1469 | 6.73% |
-| Desvios | 19 | 353 | 5.11% |
-| Instrucoes | 372 | 6212 | 5.65% |
-| Metodos | 40 | 344 | 10.42% |
-| Classes | 8 | 60 | 11.76% |
-
-## Observações
-
-Os indicadores acima foram extraídos dos relatórios existentes na pasta de execução. Confirme que os arquivos são de uma execução recente antes de utilizar os valores como evidência.
+Observacao: os resultados JUnit foram consolidados a partir dos relatórios Surefire existentes.
