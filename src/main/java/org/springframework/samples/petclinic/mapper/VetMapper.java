@@ -9,7 +9,7 @@ import org.springframework.samples.petclinic.rest.dto.VetFieldsDto;
 import java.util.Collection;
 
 /**
- * Map Vet & VetoDto using mapstruct
+ * Map Vet & VetoDto using mapstruct.
  */
 @Mapper(uses = SpecialtyMapper.class)
 public interface VetMapper {

@@ -15,7 +15,11 @@
  */
 package org.springframework.samples.petclinic.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import java.time.LocalDate;
 
@@ -48,14 +52,12 @@ public class Visit extends BaseEntity {
     @JoinColumn(name = "pet_id")
     private Pet pet;
 
-
     /**
-     * Creates a new instance of Visit for the current date
+     * Creates a new instance of Visit for the current date.
      */
     public Visit() {
         this.date = LocalDate.now();
     }
-
 
     /**
      * Getter for property date.

@@ -21,7 +21,7 @@ import org.springframework.samples.petclinic.model.Visit;
 import org.springframework.samples.petclinic.repository.VisitRepository;
 
 /**
- * Spring Data JPA specialization of the {@link VisitRepository} interface
+ * Spring Data JPA specialization of the {@link VisitRepository} interface.
  *
  * @author Michael Isvy
  * @author Vitaliy Fedoriv

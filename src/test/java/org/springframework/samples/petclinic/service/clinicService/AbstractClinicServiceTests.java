@@ -119,6 +119,34 @@ abstract class AbstractClinicServiceTests {
 
     }
 
+    /**
+     * PQT-7: every repository implementation (JDBC, JPA and Spring Data JPA) reports an unknown pet as
+     * {@code null}, never as an exception.
+     */
+    @Test
+    void shouldReturnNullForUnknownPet() {
+        assertThat(this.clinicService.findPetById(999_999)).isNull();
+    }
+
+    /**
+     * PQT-1: an 11 digit telephone (mobile number with area code) is persisted by every repository implementation.
+     */
+    @Test
+    @Transactional
+    void shouldInsertOwnerWithElevenDigitTelephone() {
+        Owner owner = new Owner();
+        owner.setFirstName("Maria");
+        owner.setLastName("Souza");
+        owner.setAddress("Rua das Flores, 123");
+        owner.setCity("Sao Paulo");
+        owner.setTelephone("11987654321");
+        this.clinicService.saveOwner(owner);
+        clearCache();
+
+        Owner reloaded = this.clinicService.findOwnerById(owner.getId());
+        assertThat(reloaded.getTelephone()).isEqualTo("11987654321");
+    }
+
 //    @Test
 //    void shouldFindAllPetTypes() {
 //        Collection<PetType> petTypes = this.clinicService.findPetTypes();

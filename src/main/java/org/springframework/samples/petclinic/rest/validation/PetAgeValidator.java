@@ -7,11 +7,14 @@ import jakarta.validation.ConstraintValidatorContext;
 
 public class PetAgeValidator implements ConstraintValidator<PetAgeValidation, LocalDate> {
 
+    /** Oldest accepted birth date, in years before today. */
+    private static final int MAX_AGE_IN_YEARS = 50;
+
     @Override
     public boolean isValid(LocalDate birthDate, ConstraintValidatorContext context) {
 
         if (birthDate == null) {
-            return true; 
+            return true;
         }
 
         LocalDate today = LocalDate.now();
@@ -24,7 +27,7 @@ public class PetAgeValidator implements ConstraintValidator<PetAgeValidation, Lo
             return false;
         }
 
-        if (birthDate.isBefore(today.minusYears(50))) {
+        if (birthDate.isBefore(today.minusYears(MAX_AGE_IN_YEARS))) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(
                 "Birth date cannot be older than 50 years"

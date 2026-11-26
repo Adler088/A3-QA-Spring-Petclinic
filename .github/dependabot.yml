@@ -1,4 +1,7 @@
 version: 2
+# PQT-10: supply-chain hardening. Dependabot only proposes versions that have been public for a while
+# ("cooldown"), so a freshly published malicious or broken release is usually detected and yanked before it
+# reaches a pull request. Cooldown applies to version updates only: security updates are never delayed.
 updates:
   - package-ecosystem: "maven"
     directory: "/"
@@ -6,3 +9,17 @@ updates:
       interval: "monthly"
     labels:
       - "dependencies"
+    cooldown:
+      default-days: 7
+
+  # Keeps the SHA-pinned GitHub Actions of .github/workflows (PQT-3) up to date: Dependabot updates both the
+  # commit SHA and the "# vX.Y.Z" comment.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    cooldown:
+      default-days: 7

@@ -20,11 +20,10 @@ import java.util.Collection;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.samples.petclinic.model.BaseEntity;
 import org.springframework.samples.petclinic.model.Owner;
 
 /**
- * Repository class for <code>Owner</code> domain objects All method names are compliant with Spring Data naming
+ * Repository class for <code>Owner</code> domain objects. All method names are compliant with Spring Data naming
  * conventions so this interface can easily be extended for Spring Data See here: http://static.springsource.org/spring-data/jpa/docs/current/reference/html/jpa.repositories.html#jpa.query-methods.query-creation
  *
  * @author Ken Krebs
@@ -64,24 +63,24 @@ public interface OwnerRepository {
      * @see BaseEntity#isNew
      */
     void save(Owner owner) throws DataAccessException;
-    
+
     /**
-     * Retrieve <code>Owner</code>s from the data store, returning all owners 
+     * Retrieve <code>Owner</code>s from the data store, returning all owners.
      *
      * @return a <code>Collection</code> of <code>Owner</code>s (or an empty <code>Collection</code> if none
      * found)
      */
-	Collection<Owner> findAll() throws DataAccessException;
+    Collection<Owner> findAll() throws DataAccessException;
 
     Page<Owner> findAll(Pageable pageable) throws DataAccessException;
-	
+
     /**
      * Delete an <code>Owner</code> to the data store by <code>Owner</code>.
      *
      * @param owner the <code>Owner</code> to delete
-     * 
+     *
      */
-	void delete(Owner owner) throws DataAccessException;
+    void delete(Owner owner) throws DataAccessException;
 
 
 }

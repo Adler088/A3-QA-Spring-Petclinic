@@ -2025,11 +2025,14 @@ components:
           example: Madison
         telephone:
           title: Telephone number
-          description: The telephone number of the pet owner.
+          description: >-
+            The telephone number of the pet owner, digits only, with 10 (landline) or 11 (mobile) digits
+            including the 2-digit area code (DDD), for example 1132654321 or 11987654321.
           type: string
-          minLength: 1
-          maxLength: 20
-          pattern: '^[0-9]*$'
+          minLength: 10
+          maxLength: 11
+          pattern: '^[0-9]{10,11}$'
+          x-pattern-message: 'must contain only digits: 10 or 11 digits including the area code'
           example: '6085551023'
       required:
         - firstName
@@ -2344,7 +2347,7 @@ components:
           title: username
           description: The username
           type: string
-          maxLength: 80
+          maxLength: 20
           minLength: 1
           example: john.doe
         password:
@@ -2353,6 +2356,7 @@ components:
           type: string
           maxLength: 80
           minLength: 1
+          writeOnly: true
           example: 1234abc
         enabled:
           title: enabled

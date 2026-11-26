@@ -29,7 +29,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 
 /**
- * Java config for springdoc-openapi API documentation library
+ * Java config for springdoc-openapi API documentation library.
  *
  * @author Vitaliy Fedoriv
  */
@@ -45,8 +45,8 @@ public class SwaggerConfig {
                 .version("1.0")
                 .termsOfService("https://github.com/spring-petclinic/spring-petclinic-rest/blob/master/terms.txt")
                 .description(
-                    "This is the REST API documentation of the Spring Petclinic backend. " +
-                        "If authentication is enabled, use admin/admin when calling the APIs")
+                    "This is the REST API documentation of the Spring Petclinic backend. "
+                        + "If authentication is enabled, use admin/admin when calling the APIs")
                 .license(swaggerLicense())
                 .contact(swaggerContact()));
     }

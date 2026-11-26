@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.sql.DataSource;
 
@@ -59,14 +60,22 @@ import org.springframework.stereotype.Repository;
 @Profile("jdbc")
 public class JdbcPetRepositoryImpl implements PetRepository {
 
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    /** Loads one pet and its visits, whatever the value of owner_id. */
+    private static final String SELECT_PET_WITH_VISITS =
+        "SELECT pets.id as pets_id, name, birth_date, type_id, owner_id, "
+            + "visits.id as visit_id, visit_date, description, "
+            + "visits.pet_id as visits_pet_id "
+            + "FROM pets LEFT OUTER JOIN visits ON pets.id = visits.pet_id "
+            + "WHERE pets.id=:id";
 
-    private SimpleJdbcInsert insertPet;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    private OwnerRepository ownerRepository;
+    private final SimpleJdbcInsert insertPet;
+
+    private final OwnerRepository ownerRepository;
 
     public JdbcPetRepositoryImpl(DataSource dataSource,
-    		OwnerRepository ownerRepository) {
+                                 OwnerRepository ownerRepository) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
         this.insertPet = new SimpleJdbcInsert(dataSource)
@@ -85,18 +94,47 @@ public class JdbcPetRepositoryImpl implements PetRepository {
             BeanPropertyRowMapper.newInstance(PetType.class));
     }
 
+    /**
+     * Loads a pet through its owner, so the owner, the type and the visits are
+     * populated.
+     * <p> {@code queryForObject} returns {@code null} when {@code owner_id} is
+     * NULL, which the PostgreSQL schema allows. Unboxing that value used to
+     * throw a {@link NullPointerException} (SpotBugs
+     * {@code NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE}); such a pet is now loaded
+     * on its own, without an owner, as the JPA implementations do.
+     *
+     * @param id the pet id
+     * @return the pet, with a {@code null} owner when owner_id is NULL
+     * @throws ObjectRetrievalFailureException when no pet has the given id
+     */
     @Override
     public Pet findById(int id) throws DataAccessException {
+        Map<String, Object> params = Map.of("id", id);
         Integer ownerId;
         try {
-            Map<String, Object> params = new HashMap<>();
-            params.put("id", id);
-            ownerId = this.namedParameterJdbcTemplate.queryForObject("SELECT owner_id FROM pets WHERE id=:id", params, Integer.class);
+            ownerId = this.namedParameterJdbcTemplate.queryForObject(
+                "SELECT owner_id FROM pets WHERE id=:id", params,
+                Integer.class);
         } catch (EmptyResultDataAccessException ex) {
             throw new ObjectRetrievalFailureException(Pet.class, id);
         }
+        if (ownerId == null) {
+            return findPetWithoutOwner(id, params);
+        }
         Owner owner = this.ownerRepository.findById(ownerId);
         return EntityUtils.getById(owner.getPets(), Pet.class, id);
+    }
+
+    private Pet findPetWithoutOwner(int id, Map<String, Object> params) {
+        List<JdbcPet> pets = this.namedParameterJdbcTemplate.query(
+            SELECT_PET_WITH_VISITS, params, new JdbcPetVisitExtractor());
+        if (pets == null || pets.isEmpty()) {
+            throw new ObjectRetrievalFailureException(Pet.class, id);
+        }
+        JdbcPet pet = pets.get(0);
+        pet.setType(EntityUtils.getById(
+            findPetTypes(), PetType.class, pet.getTypeId()));
+        return pet;
     }
 
     @Override
@@ -107,48 +145,55 @@ public class JdbcPetRepositoryImpl implements PetRepository {
             pet.setId(newKey.intValue());
         } else {
             this.namedParameterJdbcTemplate.update(
-                "UPDATE pets SET name=:name, birth_date=:birth_date, type_id=:type_id, " +
-                    "owner_id=:owner_id WHERE id=:id",
+                "UPDATE pets SET name=:name, birth_date=:birth_date, type_id=:type_id, "
+                    + "owner_id=:owner_id WHERE id=:id",
                 createPetParameterSource(pet));
         }
     }
 
     /**
-     * Creates a {@link MapSqlParameterSource} based on data values from the supplied {@link Pet} instance.
+     * Creates a {@link MapSqlParameterSource} based on data values from the
+     * supplied {@link Pet} instance. A pet without owner or type is mapped to
+     * NULL columns instead of failing with a {@link NullPointerException}.
+     *
+     * @param pet the pet to save
+     * @return the SQL parameters
      */
     private MapSqlParameterSource createPetParameterSource(Pet pet) {
         return new MapSqlParameterSource()
             .addValue("id", pet.getId())
             .addValue("name", pet.getName())
             .addValue("birth_date", pet.getBirthDate())
-            .addValue("type_id", pet.getType().getId())
-            .addValue("owner_id", pet.getOwner().getId());
+            .addValue("type_id",
+                pet.getType() == null ? null : pet.getType().getId())
+            .addValue("owner_id",
+                pet.getOwner() == null ? null : pet.getOwner().getId());
     }
 
-	@Override
-	public Collection<Pet> findAll() throws DataAccessException {
-		Map<String, Object> params = new HashMap<>();
-		Collection<Pet> pets = new ArrayList<>();
-		Collection<JdbcPet> jdbcPets;
-		jdbcPets = this.namedParameterJdbcTemplate
-				.query("SELECT pets.id as pets_id, name, birth_date, type_id, owner_id FROM pets",
-				params,
-				new JdbcPetRowMapper());
-		Collection<PetType> petTypes = this.namedParameterJdbcTemplate.query("SELECT id, name FROM types ORDER BY name",
-				new HashMap<String,
-				Object>(), BeanPropertyRowMapper.newInstance(PetType.class));
-		Collection<Owner> owners = this.namedParameterJdbcTemplate.query(
-				"SELECT id, first_name, last_name, address, city, telephone FROM owners ORDER BY last_name",
-				new HashMap<String, Object>(),
-				BeanPropertyRowMapper.newInstance(Owner.class));
-		for (JdbcPet jdbcPet : jdbcPets) {
-			jdbcPet.setType(EntityUtils.getById(petTypes, PetType.class, jdbcPet.getTypeId()));
-			jdbcPet.setOwner(EntityUtils.getById(owners, Owner.class, jdbcPet.getOwnerId()));
-			// TODO add visits
-			pets.add(jdbcPet);
-		}
-		return pets;
-	}
+    @Override
+    public Collection<Pet> findAll() throws DataAccessException {
+        Map<String, Object> params = new HashMap<>();
+        Collection<Pet> pets = new ArrayList<>();
+        Collection<JdbcPet> jdbcPets;
+        jdbcPets = this.namedParameterJdbcTemplate
+            .query("SELECT pets.id as pets_id, name, birth_date, type_id, owner_id FROM pets",
+                params,
+                new JdbcPetRowMapper());
+        Collection<PetType> petTypes = this.namedParameterJdbcTemplate.query("SELECT id, name FROM types ORDER BY name",
+            new HashMap<String,
+                Object>(), BeanPropertyRowMapper.newInstance(PetType.class));
+        Collection<Owner> owners = this.namedParameterJdbcTemplate.query(
+            "SELECT id, first_name, last_name, address, city, telephone FROM owners ORDER BY last_name",
+            new HashMap<String, Object>(),
+            BeanPropertyRowMapper.newInstance(Owner.class));
+        for (JdbcPet jdbcPet : jdbcPets) {
+            jdbcPet.setType(EntityUtils.getById(petTypes, PetType.class, jdbcPet.getTypeId()));
+            jdbcPet.setOwner(findOwnerOf(jdbcPet, owners));
+            // TODO add visits
+            pets.add(jdbcPet);
+        }
+        return pets;
+    }
 
     @Override
     public Page<Pet> findAll(@NonNull Pageable pageable) throws DataAccessException {
@@ -171,7 +216,7 @@ public class JdbcPetRepositoryImpl implements PetRepository {
 
         for (JdbcPet jdbcPet : jdbcPets) {
             jdbcPet.setType(EntityUtils.getById(petTypes, PetType.class, jdbcPet.getTypeId()));
-            jdbcPet.setOwner(EntityUtils.getById(owners, Owner.class, jdbcPet.getOwnerId()));
+            jdbcPet.setOwner(findOwnerOf(jdbcPet, owners));
         }
 
         Long total = this.namedParameterJdbcTemplate.queryForObject(
@@ -181,18 +226,37 @@ public class JdbcPetRepositoryImpl implements PetRepository {
         return new PageImpl<>(new ArrayList<>(jdbcPets), pageable, total == null ? 0 : total);
     }
 
-	@Override
-	public void delete(Pet pet) throws DataAccessException {
-		Map<String, Object> petParams = new HashMap<>();
-		petParams.put("id", pet.getId());
-		List<Visit> visits = pet.getVisits();
-		// cascade delete visits
-		for (Visit visit : visits) {
-			Map<String, Object> visitParams = new HashMap<>();
-			visitParams.put("id", visit.getId());
-			this.namedParameterJdbcTemplate.update("DELETE FROM visits WHERE id=:id", visitParams);
-		}
-		this.namedParameterJdbcTemplate.update("DELETE FROM pets WHERE id=:id", petParams);
-	}
+    /**
+     * Owner of a pet listed by {@link #findAll()}, or {@code null} for a pet
+     * whose {@code owner_id} is NULL (mapped to {@code 0} by
+     * {@link JdbcPetRowMapper}); {@link EntityUtils#getById} would throw in
+     * that case.
+     *
+     * @param pet the listed pet
+     * @param owners the owners loaded for the listing
+     * @return the owner of the pet, or {@code null}
+     */
+    private static Owner findOwnerOf(JdbcPet pet, Collection<Owner> owners) {
+        for (Owner owner : owners) {
+            if (Objects.equals(owner.getId(), pet.getOwnerId())) {
+                return owner;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void delete(Pet pet) throws DataAccessException {
+        Map<String, Object> petParams = new HashMap<>();
+        petParams.put("id", pet.getId());
+        List<Visit> visits = pet.getVisits();
+        // cascade delete visits
+        for (Visit visit : visits) {
+            Map<String, Object> visitParams = new HashMap<>();
+            visitParams.put("id", visit.getId());
+            this.namedParameterJdbcTemplate.update("DELETE FROM visits WHERE id=:id", visitParams);
+        }
+        this.namedParameterJdbcTemplate.update("DELETE FROM pets WHERE id=:id", petParams);
+    }
 
 }

@@ -27,10 +27,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author Vitaliy Fedoriv
+ * Redirects the API root to the Swagger UI.
+ * <p> Only safe methods are mapped ({@code GET}, plus the implicit
+ * {@code HEAD}/{@code OPTIONS}); any other method receives HTTP 405 with an
+ * {@code Allow} header (see {@code ExceptionControllerAdvice}).
  *
+ * @author Vitaliy Fedoriv
  */
-
 @RestController
 @CrossOrigin(exposedHeaders = "errors, content-type")
 @RequestMapping("/")
@@ -39,10 +42,9 @@ public class RootRestControllerV1 {
     @Value("#{servletContext.contextPath}")
     private String servletContextPath;
 
-	@GetMapping("/")
-	public void redirectToSwagger(HttpServletResponse response) throws IOException {
-		response.sendRedirect(this.servletContextPath + "/swagger-ui/index.html");
-	}
+    @GetMapping("/")
+    public void redirectToSwagger(HttpServletResponse response) throws IOException {
+        response.sendRedirect(this.servletContextPath + "/swagger-ui/index.html");
+    }
 
 }
-

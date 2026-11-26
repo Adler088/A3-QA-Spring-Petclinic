@@ -26,7 +26,9 @@ import org.springframework.samples.petclinic.rest.dto.VisitDto;
 import org.springframework.samples.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.samples.petclinic.service.ClinicService;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.transaction.Transactional;
@@ -51,7 +53,6 @@ public class VisitRestControllerV1 implements VisitsApi {
         this.visitMapper = visitMapper;
     }
 
-
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
     public ResponseEntity<List<VisitDto>> listVisits() {
@@ -64,7 +65,7 @@ public class VisitRestControllerV1 implements VisitsApi {
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     @Override
-    public ResponseEntity<VisitDto> getVisit( Integer visitId) {
+    public ResponseEntity<VisitDto> getVisit(Integer visitId) {
         Visit visit = this.clinicService.findVisitById(visitId);
         if (visit == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

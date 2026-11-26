@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.samples.petclinic.mapper.VetMapper;
+import org.springframework.samples.petclinic.model.Specialty;
 import org.springframework.samples.petclinic.model.Vet;
 import org.springframework.samples.petclinic.rest.advice.ExceptionControllerAdvice;
 import org.springframework.samples.petclinic.service.ClinicService;
@@ -37,8 +38,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -220,4 +224,65 @@ class VetRestControllerV1Tests {
         	.andExpect(status().isNotFound());
     }
 
+    private static Specialty specialty(int id, String name) {
+        Specialty specialty = new Specialty();
+        specialty.setId(id);
+        specialty.setName(name);
+        return specialty;
+    }
+
+    @Test
+    @WithMockUser(roles = "VET_ADMIN")
+    void testCreateVetResolvesSpecialtiesByName() throws Exception {
+        Vet newVet = vets.get(0);
+        newVet.setId(null);
+        newVet.addSpecialty(specialty(99, "radiology"));
+        given(this.clinicService.findSpecialtiesByNameIn(Set.of("radiology")))
+            .willReturn(List.of(specialty(1, "radiology")));
+        String newVetAsJSON = new ObjectMapper().writeValueAsString(vetMapper.toVetDto(newVet));
+
+        this.mockMvc.perform(post("/api/vets")
+                .content(newVetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.specialties[0].id").value(1))
+            .andExpect(jsonPath("$.specialties[0].name").value("radiology"));
+    }
+
+    @Test
+    @WithMockUser(roles = "VET_ADMIN")
+    void testUpdateVetNotFound() throws Exception {
+        given(this.clinicService.findVetById(999)).willReturn(null);
+        String vetAsJSON = new ObjectMapper().writeValueAsString(vetMapper.toVetDto(vets.get(0)));
+
+        this.mockMvc.perform(put("/api/vets/999")
+                .content(vetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "VET_ADMIN")
+    void testUpdateVetReplacesSpecialties() throws Exception {
+        Vet storedVet = vets.get(1);
+        storedVet.addSpecialty(specialty(1, "radiology"));
+        given(this.clinicService.findVetById(2)).willReturn(storedVet);
+        given(this.clinicService.findSpecialtiesByNameIn(Set.of("surgery")))
+            .willReturn(List.of(specialty(2, "surgery")));
+        Vet changedVet = new Vet();
+        changedVet.setId(2);
+        changedVet.setFirstName("Helen");
+        changedVet.setLastName("Leary");
+        changedVet.addSpecialty(specialty(2, "surgery"));
+        String changedVetAsJSON = new ObjectMapper().writeValueAsString(vetMapper.toVetDto(changedVet));
+
+        this.mockMvc.perform(put("/api/vets/2")
+                .content(changedVetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isNoContent());
+
+        verify(this.clinicService).saveVet(argThat(vet -> vet.getNrOfSpecialties() == 1
+            && "surgery".equals(vet.getSpecialties().get(0).getName())
+            && Integer.valueOf(2).equals(vet.getSpecialties().get(0).getId())));
+    }
 }

@@ -17,8 +17,8 @@ package org.springframework.samples.petclinic.repository.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +58,8 @@ import org.springframework.stereotype.Repository;
 @Profile("jdbc")
 public class JdbcVisitRepositoryImpl implements VisitRepository {
 
-    protected SimpleJdbcInsert insertVisit;
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final SimpleJdbcInsert insertVisit;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public JdbcVisitRepositoryImpl(DataSource dataSource) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -71,7 +71,11 @@ public class JdbcVisitRepositoryImpl implements VisitRepository {
 
 
     /**
-     * Creates a {@link MapSqlParameterSource} based on data values from the supplied {@link Visit} instance.
+     * Creates a {@link MapSqlParameterSource} based on data values from the
+     * supplied {@link Visit} instance.
+     *
+     * @param visit the visit to save
+     * @return the SQL parameters
      */
     protected MapSqlParameterSource createVisitParameterSource(Visit visit) {
         return new MapSqlParameterSource()
@@ -150,8 +154,7 @@ public class JdbcVisitRepositoryImpl implements VisitRepository {
         public Visit mapRow(ResultSet rs, int rowNum) throws SQLException {
             Visit visit = new Visit();
             visit.setId(rs.getInt("visit_id"));
-            Date visitDate = rs.getDate("visit_date");
-            visit.setDate(new java.sql.Date(visitDate.getTime()).toLocalDate());
+            visit.setDate(rs.getObject("visit_date", LocalDate.class));
             visit.setDescription(rs.getString("description"));
             Map<String, Object> params = new HashMap<>();
             params.put("id", rs.getInt("pets_id"));
@@ -166,11 +169,12 @@ public class JdbcVisitRepositoryImpl implements VisitRepository {
                 BeanPropertyRowMapper.newInstance(PetType.class));
             pet.setType(petType);
             params.put("owner_id", pet.getOwnerId());
-            Owner owner = JdbcVisitRepositoryImpl.this.namedParameterJdbcTemplate.queryForObject(
+            // owner_id may be NULL (PostgreSQL schema): keep a null owner
+            List<Owner> owners = JdbcVisitRepositoryImpl.this.namedParameterJdbcTemplate.query(
                 "SELECT id, first_name, last_name, address, city, telephone FROM owners WHERE id= :owner_id",
                 params,
                 BeanPropertyRowMapper.newInstance(Owner.class));
-            pet.setOwner(owner);
+            pet.setOwner(owners.isEmpty() ? null : owners.get(0));
             visit.setPet(pet);
             return visit;
         }

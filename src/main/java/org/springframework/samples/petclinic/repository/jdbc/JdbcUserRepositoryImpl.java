@@ -23,8 +23,8 @@ import org.springframework.stereotype.Repository;
 @Profile("jdbc")
 public class JdbcUserRepositoryImpl implements UserRepository {
 
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private SimpleJdbcInsert insertUser;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final SimpleJdbcInsert insertUser;
 
     public JdbcUserRepositoryImpl(DataSource dataSource) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);

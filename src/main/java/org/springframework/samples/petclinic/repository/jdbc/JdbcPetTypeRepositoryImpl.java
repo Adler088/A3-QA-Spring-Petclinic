@@ -48,20 +48,20 @@ import org.springframework.stereotype.Repository;
 @Profile("jdbc")
 public class JdbcPetTypeRepositoryImpl implements PetTypeRepository {
 
-	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-	private SimpleJdbcInsert insertPetType;
+    private final SimpleJdbcInsert insertPetType;
 
-	public JdbcPetTypeRepositoryImpl(DataSource dataSource) {
-		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-		this.insertPetType = new SimpleJdbcInsert(dataSource)
-	            .withTableName("types")
-	            .usingGeneratedKeyColumns("id");
-	}
+    public JdbcPetTypeRepositoryImpl(DataSource dataSource) {
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.insertPetType = new SimpleJdbcInsert(dataSource)
+                .withTableName("types")
+                .usingGeneratedKeyColumns("id");
+    }
 
-	@Override
-	public PetType findById(int id) {
-		PetType petType;
+    @Override
+    public PetType findById(int id) {
+        PetType petType;
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("id", id);
@@ -73,7 +73,7 @@ public class JdbcPetTypeRepositoryImpl implements PetTypeRepository {
             throw new ObjectRetrievalFailureException(PetType.class, id);
         }
         return petType;
-	}
+    }
 
     @Override
     public PetType findByName(String name) throws DataAccessException {
@@ -92,53 +92,53 @@ public class JdbcPetTypeRepositoryImpl implements PetTypeRepository {
     }
 
     @Override
-	public Collection<PetType> findAll() throws DataAccessException {
-		Map<String, Object> params = new HashMap<>();
+    public Collection<PetType> findAll() throws DataAccessException {
+        Map<String, Object> params = new HashMap<>();
         return this.namedParameterJdbcTemplate.query(
             "SELECT id, name FROM types",
             params,
             BeanPropertyRowMapper.newInstance(PetType.class));
-	}
+    }
 
-	@Override
-	public void save(PetType petType) throws DataAccessException {
-		BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(petType);
-		if (petType.isNew()) {
+    @Override
+    public void save(PetType petType) throws DataAccessException {
+        BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(petType);
+        if (petType.isNew()) {
             Number newKey = this.insertPetType.executeAndReturnKey(parameterSource);
             petType.setId(newKey.intValue());
         } else {
             this.namedParameterJdbcTemplate.update("UPDATE types SET name=:name WHERE id=:id",
                 parameterSource);
         }
-	}
+    }
 
-	@Override
-	public void delete(PetType petType) throws DataAccessException {
-		Map<String, Object> pettypeParams = new HashMap<>();
-		pettypeParams.put("id", petType.getId());
-		List<Pet> pets;
-		pets = this.namedParameterJdbcTemplate.
-    			query("SELECT pets.id, name, birth_date, type_id, owner_id FROM pets WHERE type_id=:id",
-    			pettypeParams,
-    			BeanPropertyRowMapper.newInstance(Pet.class));
-		// cascade delete pets
-		for (Pet pet : pets){
-			Map<String, Object> petParams = new HashMap<>();
-			petParams.put("id", pet.getId());
-			List<Visit> visits;
-			visits = this.namedParameterJdbcTemplate.query(
-		            "SELECT id, pet_id, visit_date, description FROM visits WHERE pet_id = :id",
-		            petParams,
-		            BeanPropertyRowMapper.newInstance(Visit.class));
-	        // cascade delete visits
-	        for (Visit visit : visits){
-	        	Map<String, Object> visitParams = new HashMap<>();
-	        	visitParams.put("id", visit.getId());
-	        	this.namedParameterJdbcTemplate.update("DELETE FROM visits WHERE id=:id", visitParams);
-	        }
-	        this.namedParameterJdbcTemplate.update("DELETE FROM pets WHERE id=:id", petParams);
+    @Override
+    public void delete(PetType petType) throws DataAccessException {
+        Map<String, Object> pettypeParams = new HashMap<>();
+        pettypeParams.put("id", petType.getId());
+        List<Pet> pets;
+        pets = this.namedParameterJdbcTemplate.
+                query("SELECT pets.id, name, birth_date, type_id, owner_id FROM pets WHERE type_id=:id",
+                pettypeParams,
+                BeanPropertyRowMapper.newInstance(Pet.class));
+        // cascade delete pets
+        for (Pet pet : pets) {
+            Map<String, Object> petParams = new HashMap<>();
+            petParams.put("id", pet.getId());
+            List<Visit> visits;
+            visits = this.namedParameterJdbcTemplate.query(
+                    "SELECT id, pet_id, visit_date, description FROM visits WHERE pet_id = :id",
+                    petParams,
+                    BeanPropertyRowMapper.newInstance(Visit.class));
+            // cascade delete visits
+            for (Visit visit : visits) {
+                Map<String, Object> visitParams = new HashMap<>();
+                visitParams.put("id", visit.getId());
+                this.namedParameterJdbcTemplate.update("DELETE FROM visits WHERE id=:id", visitParams);
+            }
+            this.namedParameterJdbcTemplate.update("DELETE FROM pets WHERE id=:id", petParams);
         }
         this.namedParameterJdbcTemplate.update("DELETE FROM types WHERE id=:id", pettypeParams);
-	}
+    }
 
 }

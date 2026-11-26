@@ -21,12 +21,11 @@ import java.util.List;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.samples.petclinic.model.BaseEntity;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.model.PetType;
 
 /**
- * Repository class for <code>Pet</code> domain objects All method names are compliant with Spring Data naming
+ * Repository class for <code>Pet</code> domain objects. All method names are compliant with Spring Data naming
  * conventions so this interface can easily be extended for Spring Data See here: http://static.springsource.org/spring-data/jpa/docs/current/reference/html/jpa.repositories.html#jpa.query-methods.query-creation
  *
  * @author Ken Krebs
@@ -62,12 +61,12 @@ public interface PetRepository {
     void save(Pet pet) throws DataAccessException;
 
     /**
-     * Retrieve <code>Pet</code>s from the data store, returning all owners
+     * Retrieve <code>Pet</code>s from the data store, returning all owners.
      *
      * @return a <code>Collection</code> of <code>Pet</code>s (or an empty <code>Collection</code> if none
      * found)
      */
-	Collection<Pet> findAll() throws DataAccessException;
+    Collection<Pet> findAll() throws DataAccessException;
 
     Page<Pet> findAll(Pageable pageable) throws DataAccessException;
 
@@ -77,6 +76,6 @@ public interface PetRepository {
      * @param pet the <code>Pet</code> to delete
      *
      */
-	void delete(Pet pet) throws DataAccessException;
+    void delete(Pet pet) throws DataAccessException;
 
 }

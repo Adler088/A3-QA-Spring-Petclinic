@@ -27,7 +27,7 @@ import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.repository.OwnerRepository;
 
 /**
- * Spring Data JPA specialization of the {@link OwnerRepository} interface
+ * Spring Data JPA specialization of the {@link OwnerRepository} interface.
  *
  * @author Michael Isvy
  * @since 15.1.2013

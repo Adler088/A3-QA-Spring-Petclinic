@@ -69,11 +69,11 @@ public class JpaPetRepositoryImpl implements PetRepository {
         }
     }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Collection<Pet> findAll() throws DataAccessException {
-		return this.em.createQuery("SELECT pet FROM Pet pet").getResultList();
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<Pet> findAll() throws DataAccessException {
+        return this.em.createQuery("SELECT pet FROM Pet pet").getResultList();
+    }
 
     @Override
     public Page<Pet> findAll(@NonNull Pageable pageable) throws DataAccessException {
@@ -86,15 +86,15 @@ public class JpaPetRepositoryImpl implements PetRepository {
         return new PageImpl<>(pets, pageable, total);
     }
 
-	@Override
-	public void delete(Pet pet) throws DataAccessException {
-		//this.em.remove(this.em.contains(pet) ? pet : this.em.merge(pet));
-		String petId = pet.getId().toString();
-		this.em.createQuery("DELETE FROM Visit visit WHERE pet.id=" + petId).executeUpdate();
-		this.em.createQuery("DELETE FROM Pet pet WHERE id=" + petId).executeUpdate();
-		if (em.contains(pet)) {
-			em.remove(pet);
-		}
-	}
+    @Override
+    public void delete(Pet pet) throws DataAccessException {
+        //this.em.remove(this.em.contains(pet) ? pet : this.em.merge(pet));
+        String petId = pet.getId().toString();
+        this.em.createQuery("DELETE FROM Visit visit WHERE pet.id=" + petId).executeUpdate();
+        this.em.createQuery("DELETE FROM Pet pet WHERE id=" + petId).executeUpdate();
+        if (em.contains(pet)) {
+            em.remove(pet);
+        }
+    }
 
 }

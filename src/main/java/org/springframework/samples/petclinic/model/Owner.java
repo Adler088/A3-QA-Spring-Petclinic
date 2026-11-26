@@ -17,12 +17,22 @@ package org.springframework.samples.petclinic.model;
 
 import org.springframework.core.style.ToStringCreator;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Digits;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Simple JavaBean domain object representing an owner.
@@ -35,6 +45,23 @@ import java.util.*;
 @Entity
 @Table(name = "owners")
 public class Owner extends Person {
+
+    /**
+     * Domain rule for telephones: digits only, 10 (landline) or 11 (mobile)
+     * digits including the area code (DDD). Must stay aligned with
+     * {@code OwnerFields.telephone} in {@code openapi.yml}, which generates the
+     * validation of the REST DTOs (checked by
+     * {@code OwnerTelephoneContractTests}).
+     */
+    public static final String TELEPHONE_REGEXP = "^[0-9]{10,11}$";
+
+    /**
+     * Validation message shared with the REST contract
+     * ({@code x-pattern-message} in {@code openapi.yml}).
+     */
+    public static final String TELEPHONE_MESSAGE =
+        "must contain only digits: 10 or 11 digits including the area code";
+
     @Column(name = "address")
     @NotEmpty
     private String address;
@@ -45,7 +72,7 @@ public class Owner extends Person {
 
     @Column(name = "telephone")
     @NotEmpty
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Phone number must contain 10 or 11 digits")
+    @Pattern(regexp = TELEPHONE_REGEXP, message = TELEPHONE_MESSAGE)
     private String telephone;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.EAGER)
@@ -105,7 +132,7 @@ public class Owner extends Person {
      * Return the Pet with the given name, or null if none found for this Owner.
      *
      * @param name to test
-     * @return true if pet name is already in use
+     * @return the pet with that name (case insensitive), or {@code null}
      */
     public Pet getPet(String name) {
         return getPet(name, false);
@@ -113,26 +140,34 @@ public class Owner extends Person {
 
     /**
      * Return the Pet with the given name, or null if none found for this Owner.
+     * The comparison is case insensitive and does not depend on the default
+     * locale.
      *
      * @param name to test
-     * @return true if pet name is already in use
+     * @param ignoreNew whether pets that were not persisted yet must be skipped
+     * @return the pet with that name, or {@code null}
      */
     public Pet getPet(String name, boolean ignoreNew) {
-        name = name.toLowerCase();
+        if (name == null) {
+            return null;
+        }
         for (Pet pet : getPetsInternal()) {
-            if (!ignoreNew || !pet.isNew()) {
-                String compName = pet.getName();
-                compName = compName.toLowerCase();
-                if (compName.equals(name)) {
-                    return pet;
-                }
+            boolean candidate = !ignoreNew || !pet.isNew();
+            if (candidate && name.equalsIgnoreCase(pet.getName())) {
+                return pet;
             }
         }
         return null;
     }
 
     public Pet getPet(Integer petId) {
-        return getPetsInternal().stream().filter(p -> p.getId().equals(petId)).findFirst().orElse(null);
+        if (petId == null) {
+            return null;
+        }
+        return getPetsInternal().stream()
+            .filter(p -> Objects.equals(p.getId(), petId))
+            .findFirst()
+            .orElse(null);
     }
 
     @Override

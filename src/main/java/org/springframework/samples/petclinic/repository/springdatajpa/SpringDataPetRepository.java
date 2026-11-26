@@ -28,7 +28,7 @@ import org.springframework.samples.petclinic.model.PetType;
 import org.springframework.samples.petclinic.repository.PetRepository;
 
 /**
- * Spring Data JPA specialization of the {@link PetRepository} interface
+ * Spring Data JPA specialization of the {@link PetRepository} interface.
  *
  * @author Michael Isvy
  * @author Vitaliy Fedoriv

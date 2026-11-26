@@ -26,7 +26,9 @@ import org.springframework.samples.petclinic.rest.dto.PetTypeDto;
 import org.springframework.samples.petclinic.rest.dto.PetTypeFieldsDto;
 import org.springframework.samples.petclinic.service.ClinicService;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.transaction.Transactional;
@@ -41,7 +43,6 @@ public class PetTypeRestControllerV1 implements PettypesApi {
 
     private final ClinicService clinicService;
     private final PetTypeMapper petTypeMapper;
-
 
     public PetTypeRestControllerV1(ClinicService clinicService, PetTypeMapper petTypeMapper) {
         this.clinicService = clinicService;

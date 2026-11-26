@@ -10,7 +10,7 @@ import org.springframework.samples.petclinic.rest.dto.UserDto;
 import java.util.Collection;
 
 /**
- * Map User/Role & UserDto/RoleDto using mapstruct
+ * Map User/Role & UserDto/RoleDto using mapstruct.
  */
 @Mapper
 public interface UserMapper {

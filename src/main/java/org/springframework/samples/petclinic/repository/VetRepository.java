@@ -21,7 +21,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.samples.petclinic.model.Vet;
 
 /**
- * Repository class for <code>Vet</code> domain objects All method names are compliant with Spring Data naming
+ * Repository class for <code>Vet</code> domain objects. All method names are compliant with Spring Data naming
  * conventions so this interface can easily be extended for Spring Data See here: http://static.springsource.org/spring-data/jpa/docs/current/reference/html/jpa.repositories.html#jpa.query-methods.query-creation
  *
  * @author Ken Krebs
@@ -38,12 +38,12 @@ public interface VetRepository {
      * @return a <code>Collection</code> of <code>Vet</code>s
      */
     Collection<Vet> findAll() throws DataAccessException;
-    
-	Vet findById(int id) throws DataAccessException;
 
-	void save(Vet vet) throws DataAccessException;
-	
-	void delete(Vet vet) throws DataAccessException;
+    Vet findById(int id) throws DataAccessException;
+
+    void save(Vet vet) throws DataAccessException;
+
+    void delete(Vet vet) throws DataAccessException;
 
 
 }

@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Map PetType & PetTypeDto using mapstruct
+ * Map PetType & PetTypeDto using mapstruct.
  */
 @Mapper
 public interface PetTypeMapper {

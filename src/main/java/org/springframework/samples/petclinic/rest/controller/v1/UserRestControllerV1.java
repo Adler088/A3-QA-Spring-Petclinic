@@ -43,7 +43,7 @@ public class UserRestControllerV1 implements UsersApi {
     }
 
 
-    @PreAuthorize( "hasRole(@roles.ADMIN)" )
+    @PreAuthorize("hasRole(@roles.ADMIN)")
     @Override
     public ResponseEntity<UserDto> addUser(UserDto userDto) {
         HttpHeaders headers = new HttpHeaders();

@@ -58,9 +58,9 @@ import java.util.Map;
 @Profile("jdbc")
 public class JdbcOwnerRepositoryImpl implements OwnerRepository {
 
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    private SimpleJdbcInsert insertOwner;
+    private final SimpleJdbcInsert insertOwner;
 
     public JdbcOwnerRepositoryImpl(DataSource dataSource) {
 
@@ -156,8 +156,8 @@ public class JdbcOwnerRepositoryImpl implements OwnerRepository {
             owner.setId(newKey.intValue());
         } else {
             this.namedParameterJdbcTemplate.update(
-                "UPDATE owners SET first_name=:firstName, last_name=:lastName, address=:address, " +
-                    "city=:city, telephone=:telephone WHERE id=:id",
+                "UPDATE owners SET first_name=:firstName, last_name=:lastName, address=:address, "
+                    + "city=:city, telephone=:telephone WHERE id=:id",
                 parameterSource);
         }
     }
@@ -180,17 +180,17 @@ public class JdbcOwnerRepositoryImpl implements OwnerRepository {
         }
     }
 
-	@Override
-	public Collection<Owner> findAll() throws DataAccessException {
-		List<Owner> owners = this.namedParameterJdbcTemplate.query(
-	            "SELECT id, first_name, last_name, address, city, telephone FROM owners",
-	            new HashMap<String, Object>(),
-	            BeanPropertyRowMapper.newInstance(Owner.class));
-		for (Owner owner : owners) {
+    @Override
+    public Collection<Owner> findAll() throws DataAccessException {
+        List<Owner> owners = this.namedParameterJdbcTemplate.query(
+                "SELECT id, first_name, last_name, address, city, telephone FROM owners",
+                new HashMap<String, Object>(),
+                BeanPropertyRowMapper.newInstance(Owner.class));
+        for (Owner owner : owners) {
             loadPetsAndVisits(owner);
         }
-	    return owners;
-	}
+        return owners;
+    }
 
     @Override
     public Page<Owner> findAll(Pageable pageable) throws DataAccessException {
@@ -210,27 +210,27 @@ public class JdbcOwnerRepositoryImpl implements OwnerRepository {
         return new PageImpl<>(owners, pageable, total == null ? 0 : total);
     }
 
-	@Override
-	@Transactional
-	public void delete(Owner owner) throws DataAccessException {
-		Map<String, Object> ownerParams = new HashMap<>();
-		ownerParams.put("id", owner.getId());
+    @Override
+    @Transactional
+    public void delete(Owner owner) throws DataAccessException {
+        Map<String, Object> ownerParams = new HashMap<>();
+        ownerParams.put("id", owner.getId());
         List<Pet> pets = owner.getPets();
         // cascade delete pets
-        for (Pet pet : pets){
-        	Map<String, Object> petParams = new HashMap<>();
-        	petParams.put("id", pet.getId());
-        	// cascade delete visits
-        	List<Visit> visits = pet.getVisits();
-            for (Visit visit : visits){
-            	Map<String, Object> visitParams = new HashMap<>();
-            	visitParams.put("id", visit.getId());
-            	this.namedParameterJdbcTemplate.update("DELETE FROM visits WHERE id=:id", visitParams);
+        for (Pet pet : pets) {
+            Map<String, Object> petParams = new HashMap<>();
+            petParams.put("id", pet.getId());
+            // cascade delete visits
+            List<Visit> visits = pet.getVisits();
+            for (Visit visit : visits) {
+                Map<String, Object> visitParams = new HashMap<>();
+                visitParams.put("id", visit.getId());
+                this.namedParameterJdbcTemplate.update("DELETE FROM visits WHERE id=:id", visitParams);
             }
             this.namedParameterJdbcTemplate.update("DELETE FROM pets WHERE id=:id", petParams);
         }
         this.namedParameterJdbcTemplate.update("DELETE FROM owners WHERE id=:id", ownerParams);
-	}
+    }
 
 
 }

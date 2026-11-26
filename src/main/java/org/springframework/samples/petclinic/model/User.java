@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.model;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,17 +55,31 @@ public class User {
         this.enabled = enabled;
     }
 
+    /**
+     * Read-only view of the roles (SpotBugs {@code EI_EXPOSE_REP}): callers can
+     * still update each {@link Role}, but the set itself only changes through
+     * {@link #setRoles(Set)} and {@link #addRole(String)}. Hibernate uses field
+     * access, so the persistent collection is not affected by the view.
+     *
+     * @return the roles of the user, or {@code null} when none were assigned
+     */
     public Set<Role> getRoles() {
-        return roles;
+        return roles == null ? null : Collections.unmodifiableSet(roles);
     }
 
+    /**
+     * Stores a defensive copy of the given roles (SpotBugs
+     * {@code EI_EXPOSE_REP2}).
+     *
+     * @param roles the roles of the user
+     */
     public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+        this.roles = roles == null ? null : new HashSet<>(roles);
     }
 
     @JsonIgnore
     public void addRole(String roleName) {
-        if(this.roles == null) {
+        if (this.roles == null) {
             this.roles = new HashSet<>();
         }
         Role role = new Role();

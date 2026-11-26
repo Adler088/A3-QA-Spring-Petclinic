@@ -14,7 +14,7 @@ import org.springframework.samples.petclinic.rest.dto.PetTypeDto;
 import java.util.Collection;
 
 /**
- * Map Pet & PetDto using mapstruct
+ * Map Pet & PetDto using mapstruct.
  */
 @Mapper(uses = VisitMapper.class)
 public interface PetMapper {

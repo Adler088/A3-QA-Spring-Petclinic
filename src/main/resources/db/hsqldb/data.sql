@@ -52,8 +52,10 @@ INSERT INTO visits VALUES (2, 8, '2013-01-02', 'rabies shot');
 INSERT INTO visits VALUES (3, 8, '2013-01-03', 'neutered');
 INSERT INTO visits VALUES (4, 7, '2013-01-04', 'spayed');
 
+-- PQT-9: BCrypt (cost 10) of the publicly documented demo password admin/admin used by the seed user.
+-- It is development seed data, not a secret: change or remove this user outside local/dev environments.
 INSERT INTO users(username, password, enabled) VALUES
-('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
+('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE); -- nosemgrep: generic.secrets.security.detected-bcrypt-hash.detected-bcrypt-hash -- demo seed (PQT-9)
 
 INSERT INTO roles (username, role) VALUES ('admin', 'ROLE_OWNER_ADMIN');
 INSERT INTO roles (username, role) VALUES ('admin', 'ROLE_VET_ADMIN');

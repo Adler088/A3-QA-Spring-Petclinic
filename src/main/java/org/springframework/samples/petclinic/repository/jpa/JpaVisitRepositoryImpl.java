@@ -65,20 +65,20 @@ public class JpaVisitRepositoryImpl implements VisitRepository {
         return query.getResultList();
     }
 
-	@Override
-	public Visit findById(int id) throws DataAccessException {
-		return this.em.find(Visit.class, id);
-	}
+    @Override
+    public Visit findById(int id) throws DataAccessException {
+        return this.em.find(Visit.class, id);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Collection<Visit> findAll() throws DataAccessException {
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<Visit> findAll() throws DataAccessException {
         return this.em.createQuery("SELECT v FROM Visit v").getResultList();
-	}
+    }
 
-	@Override
-	public void delete(Visit visit) throws DataAccessException {
+    @Override
+    public void delete(Visit visit) throws DataAccessException {
         this.em.remove(this.em.contains(visit) ? visit : this.em.merge(visit));
-	}
+    }
 
 }

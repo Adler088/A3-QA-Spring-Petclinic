@@ -20,6 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api")
 public class OwnerRestControllerV2 implements OwnerV2Api {
 
+    /**
+     * Page size used when the client does not send one (same default as
+     * openapi.yml).
+     */
+    private static final int DEFAULT_PAGE_SIZE = 20;
+
     private final ClinicService clinicService;
     private final OwnerMapper ownerMapper;
 
@@ -32,7 +38,7 @@ public class OwnerRestControllerV2 implements OwnerV2Api {
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
     public ResponseEntity<OwnerPageDto> listOwnersPage(String lastName, Integer page, Integer size) {
         int pageNumber = page == null ? 0 : page;
-        int pageSize = size == null ? 20 : size;
+        int pageSize = size == null ? DEFAULT_PAGE_SIZE : size;
         Page<Owner> owners = this.clinicService.findOwners(
             lastName,
             PageRequest.of(pageNumber, pageSize, Sort.by("id")));

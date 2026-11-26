@@ -52,6 +52,9 @@ INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2011-03-04', 'ra
 INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2009-06-04', 'neutered' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=3);
 INSERT INTO visits (pet_id, visit_date, description) SELECT 7, '2008-09-04', 'spayed' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=4);
 
+-- PQT-9: BCrypt (cost 10) of the publicly documented demo password admin/admin used by the seed user.
+-- It is development seed data, not a secret: change or remove this user outside local/dev environments.
+-- nosemgrep: generic.secrets.security.detected-bcrypt-hash.detected-bcrypt-hash -- demo seed (PQT-9)
 INSERT INTO users(username, password, enabled) SELECT 'admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE
 WHERE NOT EXISTS (SELECT * FROM users WHERE username='admin');
 

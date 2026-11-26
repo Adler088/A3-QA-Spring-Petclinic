@@ -55,6 +55,9 @@ public class JpaOwnerRepositoryImpl implements OwnerRepository {
      * There are some ways to improve it such as:
      * - creating a Ligtweight class (example here: https://community.jboss.org/wiki/LightweightClass)
      * - Turning on lazy-loading and using open session in view pattern
+     *
+     * @param lastName the beginning of the last name
+     * @return the matching owners with their pets
      */
     @SuppressWarnings("unchecked")
     public Collection<Owner> findByLastName(String lastName) {
@@ -99,12 +102,12 @@ public class JpaOwnerRepositoryImpl implements OwnerRepository {
 
     }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Collection<Owner> findAll() throws DataAccessException {
-		Query query = this.em.createQuery("SELECT owner FROM Owner owner");
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<Owner> findAll() throws DataAccessException {
+        Query query = this.em.createQuery("SELECT owner FROM Owner owner");
         return query.getResultList();
-	}
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -118,9 +121,9 @@ public class JpaOwnerRepositoryImpl implements OwnerRepository {
         return new PageImpl<>(owners, pageable, total);
     }
 
-	@Override
-	public void delete(Owner owner) throws DataAccessException {
-		this.em.remove(this.em.contains(owner) ? owner : this.em.merge(owner));
-	}
+    @Override
+    public void delete(Owner owner) throws DataAccessException {
+        this.em.remove(this.em.contains(owner) ? owner : this.em.merge(owner));
+    }
 
 }

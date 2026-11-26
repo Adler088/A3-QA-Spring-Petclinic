@@ -9,7 +9,7 @@ import org.springframework.samples.petclinic.rest.dto.VisitFieldsDto;
 import java.util.Collection;
 
 /**
- * Map Visit & VisitDto using mapstruct
+ * Map Visit & VisitDto using mapstruct.
  */
 @Mapper(uses = PetMapper.class)
 public interface VisitMapper {
